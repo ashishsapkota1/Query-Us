@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:query_us/components/component.dart';
 import 'package:query_us/screens/screens.dart';
 import '../objects/user_login.dart';
@@ -25,12 +26,12 @@ class _MyLoginPageState extends State<MyLoginPage> {
 
      if (res.statusCode == 200) {
        final display = jsonDecode(res.body);
-       final token = jsonDecode(res.body);
-       // _showAlertdialog('Status', display['message']);
+       final token = display['message'];
+       await storage.write(key: 'token', value: token);
+       _showAlertdialog('Status', display['message']);
       return movetoHome();
      } else {
        final error = jsonDecode(res.body);
-       print(res.body);
        return _showAlertdialog('Status', error['message']);
 
      }
@@ -54,6 +55,8 @@ class _MyLoginPageState extends State<MyLoginPage> {
   TextEditingController passwordController = TextEditingController();
 
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
+
+  final storage = const FlutterSecureStorage();
 
   @override
   void dispose() {

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:query_us/screens/login.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 
 class DrawerComponent extends StatefulWidget {
   const DrawerComponent({Key? key}) : super(key: key);
@@ -11,6 +12,8 @@ class DrawerComponent extends StatefulWidget {
 }
 
 class _DrawerComponentState extends State<DrawerComponent> {
+
+  final storage = const FlutterSecureStorage();
   @override
   Widget build(BuildContext context) {
     return  Drawer(
@@ -22,8 +25,7 @@ class _DrawerComponentState extends State<DrawerComponent> {
             style: TextStyle(color: Colors.black,fontSize: 16),
             ),
             onTap: ()async{
-              final SharedPreferences pref = await SharedPreferences.getInstance();
-              pref.remove('email');
+              await storage.delete(key: 'token');
               Get.to(() =>MyLoginPage());
             },
           )
