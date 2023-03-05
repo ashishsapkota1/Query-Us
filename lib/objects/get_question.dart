@@ -3,7 +3,7 @@ class Question {
   int answerCount;
   int views;
   int voteCount;
-  DateTime date;
+  var date;
   Question(
       {required this.questionTitle,
       required this.answerCount,
@@ -17,7 +17,7 @@ class Question {
         answerCount: json['answerCount'],
         views: json['views'],
         voteCount: json['voteCount'],
-        date: json['date']);
+        date: json['timestamp']);
   }
 
   Map<String, dynamic> toJson()=>{
@@ -25,7 +25,7 @@ class Question {
     'answerCount': answerCount,
     'views': views,
     'voteCount': voteCount,
-    'date': date
+    'timestamp': date
 
   };
 }

@@ -26,9 +26,9 @@ class _SplashScreenState extends State<SplashScreen> {
    _checkToken() async {
     final token = storage.read(key: 'token').toString();
     if(token.isEmpty){
-      moveToHome();
-    }else{
       moveToLogin();
+    }else{
+      moveToHome();
     }
   }
 

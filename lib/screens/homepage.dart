@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:query_us/components/drawer.dart';
 import 'package:query_us/objects/get_question.dart';
-import 'package:query_us/screens/screens.dart';
 import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
@@ -16,26 +14,16 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Question question = Question(
-      questionTitle: '',
-      answerCount: 0,
-      views: 0,
-      voteCount: 0,
-      date: DateTime.now());
+  int pageNo =0;
 
-  Future<Question> getQuestion() async {
-    final questionToken = await storage.read(key: 'token');
-    final response = await http.get(
-        Uri.parse('https://queryus-production.up.railway.app/question/all'),
-        headers: {
-          HttpHeaders.authorizationHeader: 'Bearer $questionToken'
-        });
-    if (response.statusCode == 200) {
-      return Question.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('failed to load question');
-    }
-  }
+  List<Question> question = [
+    Question(
+        questionTitle: '',
+        answerCount: 0,
+        views: 0,
+        voteCount: 0,
+        date: '')
+  ];
 
   @override
   void initState() {
@@ -45,7 +33,10 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> loadQuestion() async {
     try {
-      await getQuestion();
+      final questions = await getQuestion();
+      setState(() {
+        question = questions;
+      });
     } catch (error) {
       print('Failed to load question: $error');
     }
@@ -73,14 +64,14 @@ class _HomePageState extends State<HomePage> {
           // }, icon: const Icon(Icons.search),)
         ],
       ),
-      body: FutureBuilder<Question>(
+      body: FutureBuilder<List<Question>>(
           future: getQuestion(),
-          builder: (BuildContext context, AsyncSnapshot<Question> snapshot) {
+          builder: (context, snapshot) {
             if (snapshot.hasData) {
               return ListView.builder(
-                  itemCount:10,
-                  itemBuilder: (BuildContext context, int index) {
-                    Question question = snapshot.data!;
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) {
+                    Question questionData = snapshot.data![index];
                     return Card(
                       elevation: 12,
                       margin: const EdgeInsets.all(3),
@@ -107,7 +98,7 @@ class _HomePageState extends State<HomePage> {
                                   SizedBox(
                                     width: width * 0.1,
                                   ),
-                                  Text(question.date.toString()),
+                                  Text("${questionData.date[0]}-${questionData.date[1]}-${questionData.date[2]}"),
                                 ],
                               ),
                             ),
@@ -118,7 +109,8 @@ class _HomePageState extends State<HomePage> {
                                   const Padding(
                                     padding: EdgeInsets.only(left: 8.0),
                                     child: CircleAvatar(
-                                      backgroundImage:AssetImage('assets/person.png'),
+                                      backgroundImage:
+                                          AssetImage('assets/person.png'),
                                     ),
                                   ),
                                   SizedBox(
@@ -126,7 +118,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                   Expanded(
                                     child: Text(
-                                      question.questionTitle,
+                                      questionData.questionTitle,
                                       style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold),
@@ -149,7 +141,7 @@ class _HomePageState extends State<HomePage> {
                                       Icons.keyboard_arrow_up,
                                       size: 35,
                                     ),
-                                    Text(question.voteCount.toString())
+                                    Text(questionData.voteCount.toString())
                                   ],
                                 ),
                                 Row(
@@ -158,7 +150,7 @@ class _HomePageState extends State<HomePage> {
                                     const SizedBox(
                                       width: 6,
                                     ),
-                                    Text(question.views.toString())
+                                    Text(questionData.views.toString())
                                   ],
                                 ),
                                 Row(
@@ -167,7 +159,7 @@ class _HomePageState extends State<HomePage> {
                                     const SizedBox(
                                       width: 6,
                                     ),
-                                    Text(question.answerCount.toString())
+                                    Text(questionData.answerCount.toString())
                                   ],
                                 )
                               ],
@@ -177,10 +169,27 @@ class _HomePageState extends State<HomePage> {
                       ),
                     );
                   });
-            }else{
-              return Center(child: CircularProgressIndicator());
+            } else {
+              return const Center(child: CircularProgressIndicator());
             }
           }),
     );
+  }
+
+  Future<List<Question>> getQuestion() async {
+    final questionToken = await storage.read(key: 'token');
+    final response = await http.get(
+        Uri.parse('https://queryus-production.up.railway.app/question/all?pageNo=$pageNo'),
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $questionToken'});
+    var data = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      List<Question> questions = [];
+      for (Map<String, dynamic> index in data) {
+        questions.add(Question.fromJson(index));
+      }
+      return questions;
+    } else {
+      return [];
+    }
   }
 }
