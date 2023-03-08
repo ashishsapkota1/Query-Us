@@ -15,35 +15,15 @@ class _HomePageState extends State<HomePage> {
   int pageNo = 0;
   final ScrollController _scrollController = ScrollController();
 
-  List<Question> question = [
-    Question(
-        questionTitle: '',
-        answerCount: 0,
-        views: 0,
-        voteCount: 0,
-        date: '')
-  ];
-
   @override
   void initState() {
-    loadQuestion();
+    getQuestion();
     _scrollController.addListener(_scrollListener);
     super.initState();
-
-  }
-
-  Future<void> loadQuestion() async {
-    try {
-      final questions = await getQuestion();
-      setState(() {
-        question = questions;
-      });
-    } catch (error) {
-      print('Failed to load question: $error');
-    }
   }
 
   final storage = const FlutterSecureStorage();
+  List question =[];
 
   @override
   Widget build(BuildContext context) {
@@ -65,137 +45,138 @@ class _HomePageState extends State<HomePage> {
           // }, icon: const Icon(Icons.search),)
         ],
       ),
-      body: FutureBuilder<List<Question>>(
-          future: getQuestion(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  controller: _scrollController,
-                  itemBuilder: (context, index) {
-                    Question questionData = snapshot.data![index];
-                      return Card(
-                        elevation: 12,
-                        margin: const EdgeInsets.all(3),
-                        shadowColor: Colors.blue[100],
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Container(
-                          height: height * 0.22,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    top: 8.0, left: 80, right: 16),
-                                child: Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Computer Engineering',
-                                      style: TextStyle(color: Colors.blue[200]),
-                                    ),
-                                    SizedBox(
-                                      width: width * 0.1,
-                                    ),
-                                    Text("${questionData.date[0]}-${questionData.date[1]}-${questionData.date[2]}"),
-                                  ],
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 16.0),
-                                child: Row(
-                                  children: [
-                                    const Padding(
-                                      padding: EdgeInsets.only(left: 8.0),
-                                      child: CircleAvatar(
-                                        backgroundImage:
-                                        AssetImage('assets/person.png'),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: width * 0.09,
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        questionData.questionTitle,
-                                        style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold),
-                                        overflow: TextOverflow.visible,
-                                        maxLines: 3,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                height: height * 0.02,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.keyboard_arrow_up,
-                                        size: 35,
-                                      ),
-                                      Text(questionData.voteCount.toString())
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.remove_red_eye_outlined),
-                                      const SizedBox(
-                                        width: 6,
-                                      ),
-                                      Text(questionData.views.toString())
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.message),
-                                      const SizedBox(
-                                        width: 6,
-                                      ),
-                                      Text(questionData.answerCount.toString())
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ],
+      body: ListView.builder(
+          itemCount: question.length,
+          controller: _scrollController,
+          itemBuilder: (context, index) {
+            final questions = question[index];
+            return Card(
+              elevation: 12,
+              margin: const EdgeInsets.all(3),
+              shadowColor: Colors.blue[100],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Container(
+                height: height * 0.22,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(top: 8.0, left: 80, right: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Computer Engineering',
+                            style: TextStyle(color: Colors.blue[200]),
                           ),
+                          SizedBox(
+                            width: width * 0.1,
+                          ),
+                          Text(
+                              "date"),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: Row(
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(left: 8.0),
+                            child: CircleAvatar(
+                              backgroundImage: AssetImage('assets/person.png'),
+                            ),
+                          ),
+                          SizedBox(
+                            width: width * 0.09,
+                          ),
+                          Expanded(
+                            child: Text(
+                              "title",
+                              style: const TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.bold),
+                              overflow: TextOverflow.visible,
+                              maxLines: 3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: height * 0.02,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.keyboard_arrow_up,
+                              size: 35,
+                            ),
+                            Text(questions.count.toString())
+                          ],
                         ),
-                      );
-                  });
-
-          }else{
-            return const Center(child: CircularProgressIndicator(),);}
+                        Row(
+                          children: [
+                            const Icon(Icons.remove_red_eye_outlined),
+                            const SizedBox(
+                              width: 6,
+                            ),
+                            Text(questions.viewss.toString())
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            const Icon(Icons.message),
+                            const SizedBox(
+                              width: 6,
+                            ),
+                            Text(questions.Count.toString())
+                          ],
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
           }),
     );
   }
 
-  Future<List<Question>> getQuestion() async {
+  Future<void> getQuestion() async {
     final questionToken = await storage.read(key: 'token');
     final response = await http.get(
-        Uri.parse('https://queryus-production.up.railway.app/question/all?pageNo=${pageNo.toString()}'),
+        Uri.parse(
+            'https://queryus-production.up.railway.app/question/all?pageNo=${pageNo.toString()}'),
         headers: {HttpHeaders.authorizationHeader: 'Bearer $questionToken'});
-    var data = jsonDecode(response.body);
     if (response.statusCode == 200) {
-      List<Question> questions = [];
-      for (Map<String, dynamic> index in data) {
-        questions.add(Question.fromJson(index));
-
+      final json = jsonDecode(response.body) as List;
+      final questions = <Question>[];
+      for (final questionJson in json) {
+        final question = Question(
+          questionTitle: questionJson['questionTitle'] ?? '',
+          answerCount: questionJson['answerCount'] ?? 0,
+          views: questionJson['views'] ?? 0,
+          voteCount: questionJson['voteCount'] ?? 0,
+          date: questionJson['date'] ?? '',
+        );
+        questions.add(question);
       }
-      return question + questions;
-    } else {
-      return [];
-    }
+      setState(() {
+        question = questions;
+      });
+      setState(() {
+        question = json;
+      });
+    } else {}
   }
-  Future<void> _scrollListener()async {
+
+  Future<void> _scrollListener() async {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
       setState(() {
@@ -205,4 +186,3 @@ class _HomePageState extends State<HomePage> {
     }
   }
 }
-
