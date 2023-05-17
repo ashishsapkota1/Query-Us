@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get/get.dart';
 import 'package:query_us/components/drawer.dart';
 import 'package:query_us/objects/get_question.dart';
 import 'package:http/http.dart' as http;
@@ -79,100 +80,105 @@ class _HomePageState extends State<HomePage> {
                   controller: _scrollController,
                   itemBuilder: (context, index) {
                     Question questionData = snapshot.data![index];
-                    return Card(
-                      elevation: 12,
-                      margin: const EdgeInsets.all(3),
-                      shadowColor: Colors.blue[100],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Container(
-                        height: height * 0.22,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  top: 8.0, left: 80, right: 16),
-                              child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Computer Engineering',
-                                    style: TextStyle(color: Colors.blue[200]),
-                                  ),
-                                  // SizedBox(
-                                  //   width: width * 0.1,
-                                  // ),
-                                  // Text(
-                                  //     "${questionData.date[0]}-${questionData.date[1]}-${questionData.date[2]}"),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 16.0),
-                              child: Row(
-                                children: [
-                                  const Padding(
-                                    padding: EdgeInsets.only(left: 8.0),
-                                    child: CircleAvatar(
-                                      backgroundImage:
-                                      AssetImage('assets/person.png'),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: width * 0.09,
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      questionData.questionTitle,
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold),
-                                      overflow: TextOverflow.visible,
-                                      maxLines: 3,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(
-                              height: height * 0.02,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Row(
+                    return GestureDetector(
+                      onTap: (){
+                        tapped(index);
+                      },
+                      child: Card(
+                        elevation: 12,
+                        margin: const EdgeInsets.all(3),
+                        shadowColor: Colors.blue[100],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Container(
+                          height: height * 0.22,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    top: 8.0, left: 80, right: 16),
+                                child: Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Icon(
-                                      Icons.keyboard_arrow_up,
-                                      size: 35,
+                                    Text(
+                                      'Computer Engineering',
+                                      style: TextStyle(color: Colors.blue[200]),
                                     ),
-                                    Text(questionData.voteCount.toString())
+                                    // SizedBox(
+                                    //   width: width * 0.1,
+                                    // ),
+                                    // Text(
+                                    //     "${questionData.date[0]}-${questionData.date[1]}-${questionData.date[2]}"),
                                   ],
                                 ),
-                                Row(
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 16.0),
+                                child: Row(
                                   children: [
-                                    const Icon(Icons.remove_red_eye_outlined),
-                                    const SizedBox(
-                                      width: 6,
+                                    const Padding(
+                                      padding: EdgeInsets.only(left: 8.0),
+                                      child: CircleAvatar(
+                                        backgroundImage:
+                                        AssetImage('assets/person.png'),
+                                      ),
                                     ),
-                                    Text(questionData.views.toString())
+                                    SizedBox(
+                                      width: width * 0.09,
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        questionData.questionTitle,
+                                        style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold),
+                                        overflow: TextOverflow.visible,
+                                        maxLines: 3,
+                                      ),
+                                    ),
                                   ],
                                 ),
-                                Row(
-                                  children: [
-                                    const Icon(Icons.message),
-                                    const SizedBox(
-                                      width: 6,
-                                    ),
-                                    Text(questionData.answerCount.toString())
-                                  ],
-                                )
-                              ],
-                            ),
-                          ],
+                              ),
+                              SizedBox(
+                                height: height * 0.02,
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.keyboard_arrow_up,
+                                        size: 35,
+                                      ),
+                                      Text(questionData.voteCount.toString())
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.remove_red_eye_outlined),
+                                      const SizedBox(
+                                        width: 6,
+                                      ),
+                                      Text(questionData.views.toString())
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.message),
+                                      const SizedBox(
+                                        width: 6,
+                                      ),
+                                      Text(questionData.answerCount.toString())
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -212,5 +218,11 @@ class _HomePageState extends State<HomePage> {
      });
      print(pageNo);
     }
+  }
+
+  void tapped(int index) {
+     Get.to(()=> answerPage());
+    print(index);
+    print(questions[index].questionTitle);
   }
 }

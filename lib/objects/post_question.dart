@@ -6,14 +6,14 @@ class PostQuestion {
 
   factory PostQuestion.fromJson(Map<String, dynamic> json) {
     return PostQuestion(
-        title: json['title'],
-        description: json['description'],
+        title: json['questionTitle'],
+        description: json['questionText'],
         tags: json['tags']);
   }
 
   Map<String, dynamic> toJson() => {
-        'title': title,
-        'description': description,
+        'questionTitle': title,
+        'questionText': description,
         'tags': tags,
       };
 }
