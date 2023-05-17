@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:query_us/screens/homepage.dart';
+import 'package:query_us/screens/home_page.dart';
 import 'package:query_us/screens/login.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -23,23 +23,22 @@ class _SplashScreenState extends State<SplashScreen> {
     });
   }
 
-   _checkToken() async {
+  _checkToken() async {
     final token = storage.read(key: 'token').toString();
-    if(token.isEmpty){
+    if (token.isEmpty) {
       moveToLogin();
-    }else{
+    } else {
       moveToHome();
     }
   }
 
   moveToHome() {
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => const HomePage()));
-  }
-  moveToLogin(){
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyLoginPage()));
+    Get.to(()=> const HomePage());
   }
 
+  moveToLogin() {
+    Get.to(() => MyLoginPage());
+  }
 
   @override
   Widget build(BuildContext context) {

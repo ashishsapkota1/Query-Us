@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:query_us/components/component.dart';
+import 'package:query_us/screens/home_page.dart';
 import 'package:query_us/screens/screens.dart';
 import '../objects/user_login.dart';
 import 'package:http/http.dart' as http;
@@ -157,7 +158,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
 
                                 try {
                                   await loginUser();
-                                  HomePage();
+                                  const HomePage();
                                 } catch (e) {
                                   (e.toString());
                                 }
@@ -204,7 +205,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                                     pageBuilder: (BuildContext context,
                                         Animation<double> animation,
                                         Animation<double> secAnimation) {
-                                      return MySignUpPage();
+                                      return const MySignUpPage();
                                     }),
                               );
                             },

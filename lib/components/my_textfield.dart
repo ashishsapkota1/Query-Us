@@ -5,7 +5,7 @@ class MyTextField extends StatefulWidget {
   final String hintText;
   final bool obsecureText;
   final Icon icon;
-  final FormFieldValidator<String> validator;
+  final FormFieldValidator<String?> validator;
 
    MyTextField({super.key,
     required this.controller,
@@ -36,11 +36,11 @@ class _MyTextFieldState extends State<MyTextField> {
             prefixIcon: widget.icon,
             enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
+                borderSide: const BorderSide(
                   color: Colors.white,
                 )),
             focusedBorder:
-            OutlineInputBorder(borderSide: BorderSide(color: Colors.grey),
+            OutlineInputBorder(borderSide: const BorderSide(color: Colors.grey),
                 borderRadius: BorderRadius.circular(16)
             ),
             fillColor: Colors.grey[100],
