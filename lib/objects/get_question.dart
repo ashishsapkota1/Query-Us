@@ -1,11 +1,13 @@
 class Question {
   String questionTitle;
+  String? questionText;
   int answerCount;
   int views;
   int voteCount;
   var date;
   Question(
       {required this.questionTitle,
+      this.questionText,
       required this.answerCount,
       required this.views,
       required this.voteCount,
@@ -14,18 +16,19 @@ class Question {
   factory Question.fromJson(Map<String, dynamic> json) {
     return Question(
         questionTitle: json['questionTitle'],
+        questionText: json['questionText'],
         answerCount: json['answerCount'],
         views: json['views'],
         voteCount: json['voteCount'],
         date: json['timestamp']);
   }
 
-  Map<String, dynamic> toJson()=>{
-    'questionTitle': questionTitle,
-    'answerCount': answerCount,
-    'views': views,
-    'voteCount': voteCount,
-    'timestamp': date
-
-  };
+  Map<String, dynamic> toJson() => {
+        'questionTitle': questionTitle,
+        'questionText': questionText,
+        'answerCount': answerCount,
+        'views': views,
+        'voteCount': voteCount,
+        'timestamp': date
+      };
 }

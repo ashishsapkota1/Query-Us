@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:query_us/components/drawer.dart';
 import 'package:query_us/objects/get_question.dart';
 import 'package:http/http.dart' as http;
+import 'package:query_us/screens/question_answer.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -13,33 +14,23 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   final ScrollController _scrollController = ScrollController();
 
   int pageNo = 0;
 
-  List<Question> questions = [
-    Question(
-        questionTitle: '',
-        answerCount: 0,
-        views: 0,
-        voteCount: 0,
-        date: '')
-  ];
+  List<Question> questions = [];
 
   @override
   void initState() {
-
     _scrollController.addListener(_scrollListener);
     super.initState();
-    loadQuestion();
   }
 
   Future<List<Question>> loadQuestion() async {
     try {
       final newQuestions = await getQuestion(pageNo);
 
-        questions.addAll(newQuestions);
+      questions.addAll(newQuestions);
       return questions;
     } catch (error) {
       print('Failed to load question: $error');
@@ -51,14 +42,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    double height = MediaQuery
-        .of(context)
-        .size
-        .height;
-    double width = MediaQuery
-        .of(context)
-        .size
-        .width;
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
     return Scaffold(
       drawer: const DrawerComponent(),
       appBar: AppBar(
@@ -71,7 +56,6 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: const Color(0xFFE5EDF1),
       ),
       body: FutureBuilder<List<Question>>(
-
           future: loadQuestion(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
@@ -81,7 +65,7 @@ class _HomePageState extends State<HomePage> {
                   itemBuilder: (context, index) {
                     Question questionData = snapshot.data![index];
                     return GestureDetector(
-                      onTap: (){
+                      onTap: () {
                         tapped(index);
                       },
                       child: Card(
@@ -91,7 +75,7 @@ class _HomePageState extends State<HomePage> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Container(
+                        child: SizedBox(
                           height: height * 0.22,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,7 +85,7 @@ class _HomePageState extends State<HomePage> {
                                     top: 8.0, left: 80, right: 16),
                                 child: Row(
                                   mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'Computer Engineering',
@@ -123,7 +107,7 @@ class _HomePageState extends State<HomePage> {
                                       padding: EdgeInsets.only(left: 8.0),
                                       child: CircleAvatar(
                                         backgroundImage:
-                                        AssetImage('assets/person.png'),
+                                            AssetImage('assets/person.png'),
                                       ),
                                     ),
                                     SizedBox(
@@ -146,7 +130,8 @@ class _HomePageState extends State<HomePage> {
                                 height: height * 0.02,
                               ),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
                                 children: [
                                   Row(
                                     children: [
@@ -204,7 +189,7 @@ class _HomePageState extends State<HomePage> {
       for (Map<String, dynamic> index in data) {
         questions.add(Question.fromJson(index));
       }
-      return questions ;
+      return questions;
     } else {
       return [];
     }
@@ -213,15 +198,16 @@ class _HomePageState extends State<HomePage> {
   Future<void> _scrollListener() async {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
-     setState(() {
-       pageNo++;
-     });
-     print(pageNo);
+      setState(() {
+        pageNo++;
+      });
+      print(pageNo);
     }
   }
 
   void tapped(int index) {
-     Get.to(()=> answerPage());
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => AnswerPage(answerData: questions[index] )));
     print(index);
     print(questions[index].questionTitle);
   }
