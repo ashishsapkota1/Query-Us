@@ -1,5 +1,9 @@
+import 'package:query_us/objects/get_answer.dart';
+
 class Question {
   String questionTitle;
+  int id;
+  List<Answer>? answers;
   String? questionText;
   int answerCount;
   int views;
@@ -8,7 +12,9 @@ class Question {
   var date;
   Question(
       {required this.questionTitle,
+      required this.id,
       this.questionText,
+      this.answers = const [],
       this.tags,
       required this.answerCount,
       required this.views,
@@ -17,13 +23,19 @@ class Question {
 
   factory Question.fromJson(Map<String, dynamic> json) {
     return Question(
-        questionTitle: json['questionTitle'],
-        questionText: json['questionText'],
-        answerCount: json['answerCount'],
-        tags: List<String>.from(json['tags']),
-        views: json['views'],
-        voteCount: json['voteCount'],
-        date: json['timestamp']);
+      questionTitle: json['questionTitle'],
+      id: json['id'],
+      questionText: json['questionText'],
+      answerCount: json['answerCount'],
+      tags: List<String>.from(json['tags']),
+      answers: json['answers'] != null
+          ? List<Answer>.from(
+              json['answers'].map((dynamic x) => Answer.fromJson(x)))
+          : null,
+      views: json['views'],
+      voteCount: json['voteCount'],
+      date: json['timestamp'],
+    );
   }
 
   Map<String, dynamic> toJson() => {
@@ -32,7 +44,9 @@ class Question {
         'answerCount': answerCount,
         'views': views,
         'voteCount': voteCount,
+        'answers': List<dynamic>.from(answers!.map((x) => x.toJson())),
         'tags': tags,
-        'timestamp': date
+        'timestamp': date,
+        'id': id
       };
 }

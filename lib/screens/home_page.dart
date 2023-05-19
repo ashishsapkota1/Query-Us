@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:get/get.dart';
 import 'package:query_us/components/drawer.dart';
 import 'package:query_us/objects/get_question.dart';
 import 'package:http/http.dart' as http;
@@ -84,7 +83,8 @@ class _HomePageState extends State<HomePage> {
                                 padding: const EdgeInsets.only(
                                     top: 8.0, left: 8, right: 4),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       questionData.tags?[0] ?? '',
