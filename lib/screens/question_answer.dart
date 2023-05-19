@@ -14,7 +14,6 @@ class _AnswerPageState extends State<AnswerPage> {
   bool isLiked = false;
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Color(0xFF0A1045)),
@@ -51,16 +50,33 @@ class _AnswerPageState extends State<AnswerPage> {
                           fontWeight: FontWeight.bold,
                           color: Colors.black),
                     ),
-                    // can add more TextSpans here...
                   ],
                 ),
               ),
             ),
-
-            const Divider(thickness: 2,),
+            const Divider(
+              thickness: 2,
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(widget.answerData.questionText??'',style: const TextStyle(fontSize: 22,fontWeight: FontWeight.w400),),
+              child: Column(
+                children: [
+                  Text(
+                    widget.answerData.questionText ?? '',
+                    style: const TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.w400),
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50]
+                    ),
+
+                      child: Text(widget.answerData.tags?[0] ?? '',style: TextStyle(color: Colors.blue[300]),))
+                ],
+              ),
             ),
             const Divider(
               thickness: 1,
@@ -74,11 +90,18 @@ class _AnswerPageState extends State<AnswerPage> {
                 ),
                 Text('Answers: ${widget.answerData.answerCount}',
                     style: const TextStyle(fontSize: 18)),
-                IconButton(onPressed: (){
-                  setState(() {
-                    isLiked=!isLiked;
-                  });
-                }, icon: isLiked ?const Icon(Icons.thumb_up) : const Icon(Icons.thumb_up_off_alt_outlined))
+                IconButton(
+                    onPressed: () {
+                      setState(() {
+                        isLiked = !isLiked;
+                      });
+                    },
+                    icon: isLiked
+                        ? const Icon(
+                            Icons.thumb_up,
+                            color: Colors.green,
+                          )
+                        : const Icon(Icons.thumb_up_off_alt_outlined))
               ],
             ),
           ],

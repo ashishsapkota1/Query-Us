@@ -14,6 +14,6 @@ class PostQuestion {
   Map<String, dynamic> toJson() => {
         'questionTitle': title,
         'questionText': description,
-        'tags': tags,
+        'tags': tags.split(','),
       };
 }

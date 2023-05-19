@@ -82,20 +82,24 @@ class _HomePageState extends State<HomePage> {
                             children: [
                               Padding(
                                 padding: const EdgeInsets.only(
-                                    top: 8.0, left: 80, right: 16),
+                                    top: 8.0, left: 8, right: 4),
                                 child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      'Computer Engineering',
-                                      style: TextStyle(color: Colors.blue[200]),
+                                      questionData.tags?[0] ?? '',
+                                      overflow: TextOverflow.visible,
+                                      maxLines: 2,
+                                      style: TextStyle(color: Colors.blue[300]),
                                     ),
-                                    // SizedBox(
-                                    //   width: width * 0.1,
-                                    // ),
-                                    // Text(
-                                    //     "${questionData.date[0]}-${questionData.date[1]}-${questionData.date[2]}"),
+                                    SizedBox(
+                                      width: width * 0.1,
+                                    ),
+                                    Text(
+                                      "${questionData.date[0]}-${questionData.date[1]}-${questionData.date[2]}",
+                                      overflow: TextOverflow.visible,
+                                      maxLines: 2,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -111,7 +115,7 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                     ),
                                     SizedBox(
-                                      width: width * 0.09,
+                                      width: width * 0.07,
                                     ),
                                     Expanded(
                                       child: Text(
@@ -207,7 +211,9 @@ class _HomePageState extends State<HomePage> {
 
   void tapped(int index) {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => AnswerPage(answerData: questions[index] )));
+        context,
+        MaterialPageRoute(
+            builder: (context) => AnswerPage(answerData: questions[index])));
     print(index);
     print(questions[index].questionTitle);
   }
