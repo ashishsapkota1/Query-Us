@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:query_us/components/drawer.dart';
 import 'package:query_us/objects/get_question.dart';
 import 'package:http/http.dart' as http;
-import 'package:query_us/screens/question_answer.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -20,6 +19,12 @@ class _HomePageState extends State<HomePage> {
   int pageNo = 0;
 
   List<Question> questions = [
+    Question(
+        questionTitle: '',
+        answerCount: 0,
+        views: 0,
+        voteCount: 0,
+        date: '')
   ];
 
   @override
@@ -27,7 +32,7 @@ class _HomePageState extends State<HomePage> {
 
     _scrollController.addListener(_scrollListener);
     super.initState();
-    getQuestion(1);
+    loadQuestion();
   }
 
   Future<List<Question>> loadQuestion() async {
@@ -98,7 +103,9 @@ class _HomePageState extends State<HomePage> {
                                   mainAxisAlignment:
                                   MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(questionData.tags![0]!,style: TextStyle(color: Colors.blue[400]),
+                                    Text(
+                                      'Computer Engineering',
+                                      style: TextStyle(color: Colors.blue[200]),
                                     ),
                                     // SizedBox(
                                     //   width: width * 0.1,
@@ -209,11 +216,12 @@ class _HomePageState extends State<HomePage> {
      setState(() {
        pageNo++;
      });
+     print(pageNo);
     }
   }
 
   void tapped(int index) {
-     Navigator.push(context, MaterialPageRoute(builder: (context)=> AnswerPage(answerData: questions[index])));
+     Get.to(()=> answerPage());
     print(index);
     print(questions[index].questionTitle);
   }
