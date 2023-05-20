@@ -226,13 +226,14 @@ class _AnswerPageState extends State<AnswerPage> {
                       trailing: Column(
                         children: [
                           IconButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 setState(() {
                                   answer.upVoted = !answer.upVoted;
                                   answer.upVoted
                                       ? answer.voteCount++
                                       : answer.voteCount--;
                                 });
+                                await _updateAnsVoteCount(answer.id);
                               },
                               icon: answer.upVoted
                                   ? const Icon(
@@ -258,5 +259,30 @@ class _AnswerPageState extends State<AnswerPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _updateAnsVoteCount(int id) async {
+    final answerToken = await storage.read(key: 'token');
+
+    final response = await http.post(
+      Uri.parse('https://queryus-production.up.railway.app/vote/answer/$id'),
+      headers: {HttpHeaders.authorizationHeader: 'Bearer $answerToken'},
+    );
+
+    if (response.statusCode == 200) {
+      print('Vote count updated successfully');
+
+      // Update the local Answer object's upVoted property
+      setState(() {
+        final updatedAnswer = answers.firstWhere((answer) => answer.id == id);
+        updatedAnswer.upVoted = !updatedAnswer.upVoted;
+        updatedAnswer.upVoted
+            ? updatedAnswer.voteCount++
+            : updatedAnswer.voteCount--;
+      });
+    } else {
+      print('Failed to update vote count: ${response.body}');
+      throw Exception('Failed to update vote count');
+    }
   }
 }
