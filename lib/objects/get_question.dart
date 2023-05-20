@@ -8,6 +8,7 @@ class Question {
   int answerCount;
   int views;
   int voteCount;
+  bool upVoted;
   List<String>? tags;
   var date;
   Question(
@@ -16,6 +17,7 @@ class Question {
       this.questionText,
       this.answers = const [],
       this.tags,
+        required this.upVoted,
       required this.answerCount,
       required this.views,
       required this.voteCount,
@@ -33,6 +35,7 @@ class Question {
               json['answers'].map((dynamic x) => Answer.fromJson(x)))
           : null,
       views: json['views'],
+      upVoted: json['upVoted'],
       voteCount: json['voteCount'],
       date: json['timestamp'],
     );
@@ -47,6 +50,7 @@ class Question {
         'answers': List<dynamic>.from(answers!.map((x) => x.toJson())),
         'tags': tags,
         'timestamp': date,
-        'id': id
+        'id': id,
+    'upVoted': upVoted
       };
 }

@@ -18,6 +18,8 @@ class _HomePageState extends State<HomePage> {
   int pageNo = 0;
 
   List<Question> questions = [];
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+  GlobalKey<RefreshIndicatorState>();
 
   @override
   void initState() {
@@ -54,130 +56,143 @@ class _HomePageState extends State<HomePage> {
         ),
         backgroundColor: const Color(0xFFE5EDF1),
       ),
-      body: FutureBuilder<List<Question>>(
-          future: loadQuestion(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  controller: _scrollController,
-                  itemBuilder: (context, index) {
-                    Question questionData = snapshot.data![index];
-                    return GestureDetector(
-                      onTap: () {
-                        tapped(index);
-                      },
-                      child: Card(
-                        elevation: 12,
-                        margin: const EdgeInsets.all(3),
-                        shadowColor: Colors.blue[100],
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: SizedBox(
-                          height: height * 0.22,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    top: 8.0, left: 8, right: 4),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      questionData.tags?[0] ?? '',
-                                      overflow: TextOverflow.visible,
-                                      maxLines: 2,
-                                      style: TextStyle(color: Colors.blue[300]),
-                                    ),
-                                    SizedBox(
-                                      width: width * 0.1,
-                                    ),
-                                    Text(
-                                      "${questionData.date[0]}-${questionData.date[1]}-${questionData.date[2]}",
-                                      overflow: TextOverflow.visible,
-                                      maxLines: 2,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 16.0),
-                                child: Row(
-                                  children: [
-                                    const Padding(
-                                      padding: EdgeInsets.only(left: 8.0),
-                                      child: CircleAvatar(
-                                        backgroundImage:
-                                            AssetImage('assets/person.png'),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: width * 0.07,
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        questionData.questionTitle,
-                                        style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold),
+      body: RefreshIndicator(
+          key: _refreshIndicatorKey,
+          onRefresh: () async {
+            setState(() {
+              pageNo = 0;
+              questions.clear();
+            });
+            await loadQuestion();
+          },
+        child: FutureBuilder<List<Question>>(
+            future: loadQuestion(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    controller: _scrollController,
+                    itemBuilder: (context, index) {
+                      Question questionData = snapshot.data![index];
+                      return GestureDetector(
+                        onTap: () {
+                          tapped(index);
+                        },
+                        child: Card(
+                          elevation: 12,
+                          margin: const EdgeInsets.all(3),
+                          shadowColor: Colors.blue[100],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: SizedBox(
+                            height: height * 0.22,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 8.0, left: 8, right: 4),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        questionData.tags != null &&
+                                                questionData.tags!.length > 1
+                                            ? questionData.tags![0]
+                                            : '',
                                         overflow: TextOverflow.visible,
-                                        maxLines: 3,
+                                        maxLines: 2,
+                                        style: TextStyle(color: Colors.blue[300]),
                                       ),
+                                      SizedBox(
+                                        width: width * 0.1,
+                                      ),
+                                      Text(
+                                        "${questionData.date[0]}-${questionData.date[1]}-${questionData.date[2]}",
+                                        overflow: TextOverflow.visible,
+                                        maxLines: 2,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 16.0),
+                                  child: Row(
+                                    children: [
+                                      const Padding(
+                                        padding: EdgeInsets.only(left: 8.0),
+                                        child: CircleAvatar(
+                                          backgroundImage:
+                                              AssetImage('assets/person.png'),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: width * 0.07,
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          questionData.questionTitle,
+                                          style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold),
+                                          overflow: TextOverflow.visible,
+                                          maxLines: 3,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: height * 0.02,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.keyboard_arrow_up,
+                                          size: 35,
+                                        ),
+                                        Text(questionData.voteCount.toString())
+                                      ],
                                     ),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.remove_red_eye_outlined),
+                                        const SizedBox(
+                                          width: 6,
+                                        ),
+                                        Text(questionData.views.toString())
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.message),
+                                        const SizedBox(
+                                          width: 6,
+                                        ),
+                                        Text(questionData.answerCount.toString())
+                                      ],
+                                    )
                                   ],
                                 ),
-                              ),
-                              SizedBox(
-                                height: height * 0.02,
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.keyboard_arrow_up,
-                                        size: 35,
-                                      ),
-                                      Text(questionData.voteCount.toString())
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.remove_red_eye_outlined),
-                                      const SizedBox(
-                                        width: 6,
-                                      ),
-                                      Text(questionData.views.toString())
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.message),
-                                      const SizedBox(
-                                        width: 6,
-                                      ),
-                                      Text(questionData.answerCount.toString())
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  });
-            } else {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-          }),
+                      );
+                    });
+              } else {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+            }),
+      ),
     );
   }
 

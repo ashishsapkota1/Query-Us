@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:query_us/objects/get_answer.dart';
@@ -20,6 +19,7 @@ class _AnswerPageState extends State<AnswerPage> {
   bool isLiked = false;
   final storage = const FlutterSecureStorage();
   List<Answer> answers = [];
+
   @override
   void initState() {
     super.initState();
@@ -29,9 +29,11 @@ class _AnswerPageState extends State<AnswerPage> {
   Future<void> loadAnswers() async {
     try {
       final newAnswers = await getAnswer(widget.answerData.id);
-      setState(() {
-        answers = newAnswers;
-      });
+      if (mounted) {
+        setState(() {
+          answers = newAnswers;
+        });
+      }
     } catch (error) {
       print('Failed to load answers: $error');
     }
@@ -60,6 +62,28 @@ class _AnswerPageState extends State<AnswerPage> {
     }
   }
 
+  Future<void> updateVoteCount() async {
+    final answerToken = await storage.read(key: 'token');
+
+    int id = widget.answerData.id;
+    final response = await http.post(
+      Uri.parse('https://queryus-production.up.railway.app/vote/question/$id'),
+      headers: {HttpHeaders.authorizationHeader: 'Bearer $answerToken'},
+    );
+
+    if (response.statusCode == 200) {
+      print('Vote count updated successfully');
+      setState(() {
+        widget.answerData.upVoted
+            ? widget.answerData.voteCount++
+            : widget.answerData.voteCount--;
+      });
+    } else {
+      print('Failed to update vote count: ${response.body}');
+      throw Exception('Failed to update vote count');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,128 +96,166 @@ class _AnswerPageState extends State<AnswerPage> {
         ),
         backgroundColor: const Color(0xFFE5EDF1),
       ),
-      body: Column(
-        children: [
-          Card(
-            elevation: 12,
-            margin: const EdgeInsets.all(3),
-            shadowColor: Colors.blue[100],
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text.rich(
-                    TextSpan(
-                      text: 'Title: ',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                          color: Colors.grey),
-                      children: <TextSpan>[
-                        TextSpan(
-                          text: widget.answerData.questionTitle,
-                          style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const Divider(
-                  thickness: 2,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        widget.answerData.questionText ?? '',
-                        style: const TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.w400),
-                      ),
-                      const SizedBox(
-                        height: 8,
-                      ),
-                      Container(
-                          decoration: BoxDecoration(color: Colors.grey[50]),
-                          child: Text(
-                            widget.answerData.tags?[0] ?? '',
-                            style: TextStyle(color: Colors.blue[300]),
-                          ))
-                    ],
-                  ),
-                ),
-                const Divider(
-                  thickness: 1,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Text(
-                      'views: ${widget.answerData.views}',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                    Text('Answers: ${widget.answerData.answerCount}',
-                        style: const TextStyle(fontSize: 18)),
-                    IconButton(
-                        onPressed: () {
-                          setState(() {
-                            isLiked = !isLiked;
-                          });
-                        },
-                        icon: isLiked
-                            ? const Icon(
-                                Icons.thumb_up,
-                                color: Colors.green,
-                              )
-                            : const Icon(Icons.thumb_up_off_alt_outlined))
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: answers.length,
-              itemBuilder: (context, index) {
-                final answer = answers[index];
-                return Card(
-                  elevation: 12,
-                  margin: const EdgeInsets.all(6),
-                  shadowColor: Colors.blue[100],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: ListTile(
-                    title: Text.rich(
+      body: Container(
+        child: Column(
+          children: [
+            Card(
+              elevation: 12,
+              margin: const EdgeInsets.all(3),
+              shadowColor: Colors.blue[100],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text.rich(
                       TextSpan(
-                        text: 'Answer-${index+1}:- ',
+                        text: 'Title: ',
                         style: const TextStyle(
+                            fontWeight: FontWeight.bold,
                             fontSize: 22,
                             color: Colors.grey),
                         children: <TextSpan>[
                           TextSpan(
-                            text: answer.answer,
+                            text: widget.answerData.questionTitle,
                             style: const TextStyle(
                                 fontSize: 18,
-                                fontWeight: FontWeight.w400,
+                                fontWeight: FontWeight.bold,
                                 color: Colors.black),
                           ),
                         ],
                       ),
                     ),
-                    // Add any other properties of the answer you want to display
                   ),
-                );
-              },
+                  const Divider(
+                    thickness: 2,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          widget.answerData.questionText ?? '',
+                          style: const TextStyle(
+                              fontSize: 22, fontWeight: FontWeight.w400),
+                        ),
+                        const SizedBox(
+                          height: 8,
+                        ),
+                        Container(
+                            decoration: BoxDecoration(color: Colors.grey[50]),
+                            child: Text(
+                              widget.answerData.tags?[0] ?? '',
+                              style: TextStyle(color: Colors.blue[300]),
+                            ))
+                      ],
+                    ),
+                  ),
+                  const Divider(
+                    thickness: 1,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Text(
+                        'views: ${widget.answerData.views}',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text('Answers: ${widget.answerData.answerCount}',
+                          style: const TextStyle(fontSize: 18)),
+                      Row(
+                        children: [
+                          IconButton(
+                              onPressed: () async {
+                                setState(() {
+                                  widget.answerData.upVoted =
+                                      !widget.answerData.upVoted;
+                                  widget.answerData.upVoted
+                                      ? widget.answerData.voteCount++
+                                      : widget.answerData.voteCount--;
+                                });
+                                await updateVoteCount();
+                              },
+                              icon: widget.answerData.upVoted
+                                  ? const Icon(
+                                      Icons.thumb_up,
+                                      color: Colors.green,
+                                    )
+                                  : const Icon(
+                                      Icons.thumb_up_off_alt_outlined)),
+                          Text(' :${widget.answerData.voteCount}',
+                              style: const TextStyle(fontSize: 18))
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: ListView.builder(
+                itemCount: answers.length,
+                itemBuilder: (context, index) {
+                  final answer = answers[index];
+                  return Card(
+                    elevation: 12,
+                    margin: const EdgeInsets.all(6),
+                    shadowColor: Colors.blue[100],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: ListTile(
+                      title: Text.rich(
+                        TextSpan(
+                          text: 'Answer-${index + 1}:- ',
+                          style:
+                              const TextStyle(fontSize: 22, color: Colors.grey),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: answer.answer,
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black),
+                            ),
+                          ],
+                        ),
+                      ),
+                      trailing: Column(
+                        children: [
+                          IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  answer.upVoted = !answer.upVoted;
+                                  answer.upVoted
+                                      ? answer.voteCount++
+                                      : answer.voteCount--;
+                                });
+                              },
+                              icon: answer.upVoted
+                                  ? const Icon(
+                                      Icons.thumb_up,
+                                      color: Colors.green,
+                                    )
+                                  : const Icon(
+                                      Icons.thumb_up_off_alt_outlined)),
+                          Expanded(
+                              child: Text(
+                            '${answer.voteCount}',
+                            overflow: TextOverflow.visible,
+                            maxLines: 1,
+                          ))
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
