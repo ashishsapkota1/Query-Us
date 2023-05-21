@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:query_us/screens/home_page.dart';
 import 'package:query_us/screens/login.dart';
@@ -44,10 +43,10 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: SvgPicture.asset(
-          'assets/logo3.svg',
-          height: 60,
-          width: 70,
+        child: Image.asset(
+          'assets/newLogo.png',
+          height: 200,
+          width: 200,
         ),
       ),
     );

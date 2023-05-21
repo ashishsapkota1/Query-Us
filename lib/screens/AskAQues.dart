@@ -31,7 +31,14 @@ class _AskAQuestionState extends State<AskAQuestion> {
     TextEditingController tagsController = TextEditingController();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ask question'),
+        iconTheme: const IconThemeData(color: Color(0xFF0A1045)),
+        centerTitle: true,
+        scrolledUnderElevation: 10,
+        title: const Text(
+          'Ask a Question',
+          style: TextStyle(color: Color(0xFF0A1045)),
+        ),
+        backgroundColor: const Color(0xFFE5EDF1),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

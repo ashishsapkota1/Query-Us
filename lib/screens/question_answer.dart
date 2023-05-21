@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:query_us/objects/get_answer.dart';
 import 'package:query_us/objects/get_question.dart';
 import 'package:http/http.dart' as http;
+import 'package:query_us/screens/floating_button.dart';
 
 class AnswerPage extends StatefulWidget {
   const AnswerPage({Key? key, required this.answerData}) : super(key: key);
@@ -16,8 +17,9 @@ class AnswerPage extends StatefulWidget {
 }
 
 class _AnswerPageState extends State<AnswerPage> {
-  bool isLiked = false;
+  late bool isLiked ;
   final storage = const FlutterSecureStorage();
+  late int newCount;
   List<Answer> answers = [];
 
   @override
@@ -35,7 +37,7 @@ class _AnswerPageState extends State<AnswerPage> {
         });
       }
     } catch (error) {
-      print('Failed to load answers: $error');
+      throw Exception('Failed to load answer');
     }
   }
 
@@ -54,7 +56,6 @@ class _AnswerPageState extends State<AnswerPage> {
 
       final List<Answer> answers =
           answerList.map((json) => Answer.fromJson(json)).toList();
-      print(answers);
 
       return answers;
     } else {
@@ -62,50 +63,51 @@ class _AnswerPageState extends State<AnswerPage> {
     }
   }
 
-  Future<void> updateVoteCount() async {
+  Future<void> updateVoteCount(int id) async {
     final answerToken = await storage.read(key: 'token');
 
     int id = widget.answerData.id;
     final response = await http.post(
       Uri.parse('https://queryus-production.up.railway.app/vote/question/$id'),
-      headers: {HttpHeaders.authorizationHeader: 'Bearer $answerToken'},
+      headers: {
+        HttpHeaders.authorizationHeader: 'Bearer $answerToken',
+        HttpHeaders.contentTypeHeader: 'application/json',
+      },
     );
 
     if (response.statusCode == 200) {
-      print('Vote count updated successfully');
-      setState(() {
-        widget.answerData.upVoted
-            ? widget.answerData.voteCount++
-            : widget.answerData.voteCount--;
-      });
+      print(widget.answerData.upVoted);
+        widget.answerData.upVoted=!isLiked;
+        print(widget.answerData.upVoted);
     } else {
-      print('Failed to update vote count: ${response.body}');
       throw Exception('Failed to update vote count');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    isLiked = widget.answerData.upVoted;
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Color(0xFF0A1045)),
         centerTitle: true,
+        scrolledUnderElevation: 10,
         title: const Text(
           'Query-Us',
           style: TextStyle(color: Color(0xFF0A1045)),
         ),
         backgroundColor: const Color(0xFFE5EDF1),
       ),
-      body: Container(
-        child: Column(
-          children: [
-            Card(
-              elevation: 12,
-              margin: const EdgeInsets.all(3),
-              shadowColor: Colors.blue[100],
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+      body: Column(
+        children: [
+          Card(
+            elevation: 12,
+            margin: const EdgeInsets.all(3),
+            shadowColor: Colors.blue[100],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: SingleChildScrollView(
               child: Column(
                 children: [
                   Padding(
@@ -169,16 +171,22 @@ class _AnswerPageState extends State<AnswerPage> {
                         children: [
                           IconButton(
                               onPressed: () async {
+                                print(isLiked);
                                 setState(() {
-                                  widget.answerData.upVoted =
-                                      !widget.answerData.upVoted;
-                                  widget.answerData.upVoted
-                                      ? widget.answerData.voteCount++
-                                      : widget.answerData.voteCount--;
+
+                                 isLiked=!isLiked;
+                                 if (isLiked) {
+                                   widget.answerData.voteCount += 1;
+                                 } else {
+                                   widget.answerData.voteCount -= 1;
+                                 }
+
                                 });
-                                await updateVoteCount();
+                                print(isLiked);
+
+                                await updateVoteCount(widget.answerData.id);
                               },
-                              icon: widget.answerData.upVoted
+                              icon: isLiked
                                   ? const Icon(
                                       Icons.thumb_up,
                                       color: Colors.green,
@@ -194,70 +202,68 @@ class _AnswerPageState extends State<AnswerPage> {
                 ],
               ),
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: answers.length,
-                itemBuilder: (context, index) {
-                  final answer = answers[index];
-                  return Card(
-                    elevation: 12,
-                    margin: const EdgeInsets.all(6),
-                    shadowColor: Colors.blue[100],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: ListTile(
-                      title: Text.rich(
-                        TextSpan(
-                          text: 'Answer-${index + 1}:- ',
-                          style:
-                              const TextStyle(fontSize: 22, color: Colors.grey),
-                          children: <TextSpan>[
-                            TextSpan(
-                              text: answer.answer,
-                              style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black),
-                            ),
-                          ],
-                        ),
-                      ),
-                      trailing: Column(
-                        children: [
-                          IconButton(
-                              onPressed: () async {
-                                setState(() {
-                                  answer.upVoted = !answer.upVoted;
-                                  answer.upVoted
-                                      ? answer.voteCount++
-                                      : answer.voteCount--;
-                                });
-                                await _updateAnsVoteCount(answer.id);
-                              },
-                              icon: answer.upVoted
-                                  ? const Icon(
-                                      Icons.thumb_up,
-                                      color: Colors.green,
-                                    )
-                                  : const Icon(
-                                      Icons.thumb_up_off_alt_outlined)),
-                          Expanded(
-                              child: Text(
-                            '${answer.voteCount}',
-                            overflow: TextOverflow.visible,
-                            maxLines: 1,
-                          ))
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: answers.length,
+              itemBuilder: (context, index) {
+                final answer = answers[index];
+                return Card(
+                  elevation: 12,
+                  margin: const EdgeInsets.all(6),
+                  shadowColor: Colors.blue[100],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: ListTile(
+                    minLeadingWidth: 10,
+                    title: Text.rich(
+                      TextSpan(
+                        text: 'Answer-${index + 1}:- ',
+                        style:
+                            const TextStyle(fontSize: 22, color: Colors.grey),
+                        children: <TextSpan>[
+                          TextSpan(
+                            text: answer.answer,
+                            style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black),
+                          ),
                         ],
                       ),
                     ),
-                  );
-                },
-              ),
+                    trailing: Column(
+                      children: [
+                        IconButton(
+                            onPressed: () async {
+                              setState(() {
+                                answer.upVoted = !answer.upVoted;
+                              });
+                              await _updateAnsVoteCount(answer.id);
+                            },
+                            icon: answer.upVoted
+                                ? const Icon(
+                                    Icons.thumb_up,
+                                    color: Colors.green,
+                                  )
+                                : const Icon(Icons.thumb_up_off_alt_outlined)),
+                        Expanded(
+                            child: Text(
+                          '${answer.voteCount}',
+                          overflow: TextOverflow.visible,
+                          maxLines: 1,
+                        ))
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
+      floatingActionButton: FloatingAction(questionId: widget.answerData.id),
     );
   }
 
@@ -270,18 +276,13 @@ class _AnswerPageState extends State<AnswerPage> {
     );
 
     if (response.statusCode == 200) {
-      print('Vote count updated successfully');
-
-      // Update the local Answer object's upVoted property
       setState(() {
         final updatedAnswer = answers.firstWhere((answer) => answer.id == id);
-        updatedAnswer.upVoted = !updatedAnswer.upVoted;
         updatedAnswer.upVoted
             ? updatedAnswer.voteCount++
             : updatedAnswer.voteCount--;
       });
     } else {
-      print('Failed to update vote count: ${response.body}');
       throw Exception('Failed to update vote count');
     }
   }
