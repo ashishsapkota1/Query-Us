@@ -5,6 +5,7 @@ class Question {
   int id;
   List<Answer>? answers;
   String? questionText;
+  int userId;
   int answerCount;
   int views;
   int voteCount;
@@ -16,6 +17,7 @@ class Question {
       required this.id,
       this.questionText,
       this.answers = const [],
+        required this.userId,
       this.tags,
         required this.upVoted,
       required this.answerCount,
@@ -36,6 +38,7 @@ class Question {
           : null,
       views: json['views'],
       upVoted: json['upVoted'],
+      userId: json['userId'],
       voteCount: json['voteCount'],
       date: json['timestamp'],
     );
@@ -51,6 +54,7 @@ class Question {
         'tags': tags,
         'timestamp': date,
         'id': id,
+    'userId':userId,
     'upVoted': upVoted
       };
 }

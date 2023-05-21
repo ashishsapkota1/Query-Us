@@ -17,10 +17,9 @@ class AnswerPage extends StatefulWidget {
 }
 
 class _AnswerPageState extends State<AnswerPage> {
-  late bool isLiked ;
   final storage = const FlutterSecureStorage();
-  late int newCount;
   List<Answer> answers = [];
+  List<Question> questions=[];
 
   @override
   void initState() {
@@ -64,21 +63,20 @@ class _AnswerPageState extends State<AnswerPage> {
   }
 
   Future<void> updateVoteCount(int id) async {
-    final answerToken = await storage.read(key: 'token');
+    final token = await storage.read(key: 'token');
 
-    int id = widget.answerData.id;
     final response = await http.post(
       Uri.parse('https://queryus-production.up.railway.app/vote/question/$id'),
-      headers: {
-        HttpHeaders.authorizationHeader: 'Bearer $answerToken',
-        HttpHeaders.contentTypeHeader: 'application/json',
-      },
+      headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
     );
 
     if (response.statusCode == 200) {
-      print(widget.answerData.upVoted);
-        widget.answerData.upVoted=!isLiked;
-        print(widget.answerData.upVoted);
+      setState(() {
+        final updatedQuestion = questions.firstWhere((question) => question.id == id);
+        updatedQuestion.upVoted
+            ? updatedQuestion.voteCount++
+            : updatedQuestion.voteCount--;
+      });
     } else {
       throw Exception('Failed to update vote count');
     }
@@ -86,7 +84,6 @@ class _AnswerPageState extends State<AnswerPage> {
 
   @override
   Widget build(BuildContext context) {
-    isLiked = widget.answerData.upVoted;
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Color(0xFF0A1045)),
@@ -171,22 +168,12 @@ class _AnswerPageState extends State<AnswerPage> {
                         children: [
                           IconButton(
                               onPressed: () async {
-                                print(isLiked);
                                 setState(() {
-
-                                 isLiked=!isLiked;
-                                 if (isLiked) {
-                                   widget.answerData.voteCount += 1;
-                                 } else {
-                                   widget.answerData.voteCount -= 1;
-                                 }
-
+                                  widget.answerData.upVoted = !widget.answerData.upVoted;
                                 });
-                                print(isLiked);
-
                                 await updateVoteCount(widget.answerData.id);
                               },
-                              icon: isLiked
+                              icon: widget.answerData.upVoted
                                   ? const Icon(
                                       Icons.thumb_up,
                                       color: Colors.green,

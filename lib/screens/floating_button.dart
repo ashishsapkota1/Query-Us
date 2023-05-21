@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:query_us/objects/get_answer.dart';
 import 'package:query_us/objects/post_answer.dart';
 
 class FloatingAction extends StatefulWidget {
@@ -14,8 +15,9 @@ class FloatingAction extends StatefulWidget {
 }
 
 class _FloatingActionState extends State<FloatingAction> {
-  PostAns postAns = PostAns(answer: '');
+  PostAns postAns=PostAns(answer: '');
   final storage = const FlutterSecureStorage();
+  List<Answer> answers=[];
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +26,10 @@ class _FloatingActionState extends State<FloatingAction> {
       onPressed: () {
         showModalBottomSheet<void>(
             shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(10))),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(18))),
             isScrollControlled: true,
             isDismissible: false,
+            enableDrag: true,
             context: context,
             builder: (BuildContext context) {
               return Wrap(
@@ -74,7 +77,8 @@ class _FloatingActionState extends State<FloatingAction> {
                                       Colors.green, // Background color
                                 ),
                                 onPressed: () async {
-                                  postAns.answer = answerController.text.trim();
+                                  postAns.answer= answerController.text.trim();
+                                  Navigator.pop(context);
                                   try {
                                     await postAnswer(widget.questionId);
                                   } catch (e) {
@@ -108,17 +112,32 @@ class _FloatingActionState extends State<FloatingAction> {
 
   Future<void> postAnswer(int questionId) async {
     String uri =
-        'https://queryus-production.up.railway.app/answer/add/$questionId';
+        'https://queryus-production.up.railway.app/answer/add/$questionId?answer=${Uri.encodeQueryComponent(postAns.answer)}';
     final questionToken = await storage.read(key: 'token');
     final response = await http.post(Uri.parse(uri),
         headers: {
           HttpHeaders.authorizationHeader: 'Bearer $questionToken',
+          HttpHeaders.contentTypeHeader: 'application/json',
         },
         body: jsonEncode({
           'answer': postAns.answer,
         }));
     print(response.statusCode);
+    final display = jsonDecode(response.body);
+    print(display);
     if (response.statusCode == 200) {
+
+      print(response.body);
+      _showAlertdialog('Status', display['message']);
+    } else {
+      final errorMessage = jsonDecode(response.body);
+      return _showAlertdialog('Status', errorMessage['message']);
     }
+  }
+
+  _showAlertdialog(String title, String message) {
+    AlertDialog alertDialog =
+        AlertDialog(title: Text(title), content: Text(message));
+    showDialog(context: context, builder: (_) => alertDialog);
   }
 }
